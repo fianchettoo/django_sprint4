@@ -165,11 +165,13 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         )
 
 
-class PostCreateView(LoginRequiredMixin, CreateView):
+class PostMixin:
     model = Post
     template_name = 'blog/create.html'
     form_class = PostForm
 
+
+class PostCreateView(LoginRequiredMixin, PostMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
@@ -181,11 +183,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         )
 
 
-class PostUpdateView(UpdateView):
-    model = Post
-    template_name = 'blog/create.html'
-    form_class = PostForm
-
+class PostUpdateView(PostMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy(
             'blog:post_detail',
@@ -199,11 +197,7 @@ class PostUpdateView(UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class PostDeleteView(DeleteView):
-    model = Post
-    template_name = 'blog/create.html'
-    form_class = PostForm
-
+class PostDeleteView(PostMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = self.form_class(instance=self.object)
